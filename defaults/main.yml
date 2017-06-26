@@ -1,0 +1,81 @@
+---
+
+app_root: /u01/app
+data_root: /u01/data
+
+oracle_os_user: oracle
+oracle_os_group: oinstall
+oracle_osdba_group: dba
+
+os_rpms:
+  - dos2unix
+  - perl-XML-XPath
+  - binutils
+  - gcc
+  - gcc-c++
+  - glibc
+  - glibc-common
+  - glibc-devel
+  - glibc-headers
+  - libgcc
+  - libstdc++
+  - libstdc++-devel
+  - libaio
+  - libaio-devel
+  - make
+  - sysstat
+  - elfutils-libelf
+  - elfutils-libelf-devel
+  - unzip
+  - zsh
+  - xterm
+  - unixODBC
+  - vim
+  - mc
+  - screen
+  - diffutils
+  - telnet
+  - readline
+  - xfsprogs
+  - xfsdump
+  - expect
+  - openldap-clients
+
+# List of rpms to be installed with EPEL repository enabled (http://fedoraproject.org/wiki/EPEL)
+os_rpms_epel:
+  - rlwrap
+  - python-pip
+  - python-setuptools  
+
+pip_modules:
+  - dpath
+  - pexpect
+
+# http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
+aws_s3_endpoints: {
+  "us-west-1": "s3-us-west-1.amazonaws.com",
+  "us-west-2": "s3-us-west-2.amazonaws.com",
+  "eu-west-1": "s3-eu-west-1.amazonaws.com",
+  "eu-west-2": "s3-eu-west-2.amazonaws.com" }
+
+# Dictionary with basic Oracle-related OS groups
+os_groups:
+  oinstall:
+    name: oinstall
+    gid: 520
+  dba:
+    name: dba
+    gid: 521
+
+# Dictionary with basic Oracle-related OS users
+os_users:
+  oracle:
+    name: oracle
+    uid: 520
+    group: oinstall
+    groups: dba
+    shell: /bin/bash
+    home: /home/oracle
+    createhome: yes
+    comment: Oracle software owner
+

@@ -1,0 +1,75 @@
+---
+
+- name: Gather AWS EC2 facts
+  action: ec2_facts
+
+- name: Remove OpenJDK components
+  yum: name={{ item }} state=absent
+  with_items:
+    - java-1.6.0-openjdk
+    - java-1.7.0-openjdk
+    - java-1.8.0-openjdk
+
+- name: Install OS packages required for Oracle components
+  yum: name={{ item }} state=latest
+  with_items: "{{ os_rpms }}"
+
+- name: Install OS packages required for Oracle components from EPEL
+  yum: name={{ item }} state=latest enablerepo=epel
+  with_items: "{{ os_rpms_epel }}"
+
+- name: Install Python modules by "pip"
+  pip: name={{ item }} state=latest
+  with_items: "{{ pip_modules }}"
+
+- name: Create OS groups
+  group: name={{ item }} gid={{ os_groups[item].gid }} system=yes
+  with_items:
+    - "{{ oracle_os_group }}"
+    - "{{ oracle_osdba_group }}"
+
+- name: Create "{{ oracle_os_user }}" user
+  user:
+    name: "{{ oracle_os_user }}"
+    group: "{{ oracle_os_group }}"
+    groups: "{{ oracle_osdba_group }}"
+    uid: "{{ os_users[oracle_os_user].uid }}"
+    home: "{{ os_users[oracle_os_user].home }}"
+    createhome: yes
+    comment: "{{ os_users[oracle_os_user].comment }}"
+
+- name: Check if additional volume specified and exists
+  stat: path={{ app_root_dev }} get_md5=no get_checksum=no
+  register: u01_dev
+  when: app_root_dev is defined
+
+- name: Create XFS filesystem
+  filesystem: fstype=xfs dev={{ app_root_dev }}
+  when: app_root_dev is defined and u01_dev.stat.isblk is defined and u01_dev.stat.isblk
+
+- name: Create directories for ansible custom facts and root for apps
+  file: path={{ item }} state=directory recurse=yes owner=root group=root mode=0755
+  with_items:
+    - /etc/ansible/facts.d
+    - "{{ app_root }}"
+
+- name: Mount filesystem to {{ app_root }}
+  mount: name={{ app_root }} src={{ app_root_dev }} fstype=xfs opts="defaults,noatime,attr2" state=mounted
+  when: app_root_dev is defined and u01_dev.stat.isblk is defined and u01_dev.stat.isblk
+
+- name: Create directories
+  file: path={{ item.name }} owner={{ oracle_os_user }} group={{ oracle_os_group }} state=directory recurse=yes mode={{ item.mode }}
+  with_items:
+    - { name: "{{ oracle_os_user_home }}/bin", mode: "0755" }
+    - { name: "{{ oracle_base }}", mode: "0775" }
+    - { name: "{{ oracle_inventory }}", mode: "0770" }
+
+- name: Create Oracle Inventory pointer file
+  template: src=etc/oraInst.loc.j2 dest=/etc/oraInst.loc owner=root group={{ oracle_os_group }} mode=0775
+  
+- name: Update /etc/profile.d/less.sh
+  lineinfile: dest=/etc/profile.d/less.sh regexp="^(export LESS_TERMCAP.*)$" line="#\1" state=present backrefs=yes
+
+- name: Generate local product-specific facts
+  template: src=etc/ansible/facts.d/oracle.json.j2 dest=/etc/ansible/facts.d/oracle.fact mode=0644
+

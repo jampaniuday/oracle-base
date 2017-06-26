@@ -1,0 +1,5 @@
+---
+
+oracle_base: "{{ app_root }}/oracle"
+oracle_inventory: "{{ app_root }}/oraInventory"
+oracle_os_user_home: "{{ os_users[oracle_os_user].home }}"

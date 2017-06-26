@@ -1,0 +1,5 @@
+---
+- hosts: all
+  roles:
+    - role: oracle-base
+      app_root: /u01/app
