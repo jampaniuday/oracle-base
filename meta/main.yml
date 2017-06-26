@@ -1,0 +1,21 @@
+galaxy_info:
+  author: Pavel Voinov
+  description: https://github.com/pavel-voinov
+  license: MIT
+  # github_branch:
+
+  min_ansible_version: 2.2
+  # min_ansible_container_version:
+
+  platforms:
+    - name: Amazon Linux
+      versions:
+      - all
+    - name: Oracle Linux
+      versions:
+      - 6.6+
+      - 7.0+
+
+  galaxy_tags:
+    - oracle
+

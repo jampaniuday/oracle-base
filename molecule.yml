@@ -3,10 +3,6 @@ ansible:
   playbook: molecule-playbook.yml
   diff: False
 
-dependency:
-  name: galaxy
-  requirements_file: galaxy_requirements.yml 
-
 driver:
   name: docker
 
